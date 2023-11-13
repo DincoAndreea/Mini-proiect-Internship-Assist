@@ -6,7 +6,7 @@ First, clone the repository for this app or download the source code zip file.
 
 To run this app, SQL Server and Entity Framework are needed. 
 
-To install the tools needed for Entity Framework, type in the following command line in the Package Manager Console :
+To install the tools needed for Entity Framework, type in the following command line in the Package Manager Console:
 
 ``` dotnet tool install --global dotnet-ef ```
 
