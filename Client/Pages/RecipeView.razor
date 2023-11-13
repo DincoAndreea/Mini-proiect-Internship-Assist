@@ -1,0 +1,357 @@
+﻿@page "/recipe/{Id:int}"
+@using RecipeApp.Shared;
+@inject ICookbookService _CookbookService
+@inject IRecipeService _RecipeService
+@inject IIngredientService _IngredientService
+@inject IIngredientNoteService _IngredientNoteService
+@inject IInstructionService _InstructionService
+@inject INutritionFactsService _NutritionFactsService
+@inject NavigationManager _NavigationManager
+
+<style>
+    body{
+        padding: 20px;
+        background-color: #F5DFD6;
+        color: #7F594F;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-content: center;
+        align-items: center;
+        min-width: 800px;
+    }
+
+    #recipe-view {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    img {
+        height: 300px;
+        width: 300px;
+        border-radius: 5px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    #recipe-view-image-and-title{
+        display: flex;
+        column-gap: 15px;
+        padding-bottom: 10px;
+        width: 100%;
+        max-width: 1325px;
+    }
+
+    #recipe-view-description {
+        width: 100%;
+        word-wrap: anywhere;
+    }
+
+    #recipe-image img {
+        width: 300px;
+        height: 100%;
+        max-height: 400px;
+        min-height: 300px;
+    }
+
+    #title-buttons {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 10px;
+    }
+
+    #recipe-view-buttons {
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    #title-description{
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        padding: 15px;
+        max-height: 400px;
+        border-radius: 5px;
+        width: 100%;
+        min-height: 300px;
+    }
+
+    #recipe-view-time-and-nutrition {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+    }
+
+    #recipe-view-time-details{
+        display:flex;
+        column-gap: 10px;
+        background-color: #AE7589;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+        flex-direction: column;
+        row-gap: 15px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    .recipe-view-details{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: start;
+        align-items: start;
+    }
+
+    #recipe-note {
+        background-color: #5C3A4E;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    #recipe-view-ingredients {
+        width: 25vw;
+    }
+
+    #recipe-view-instructions {
+        height: 100%;
+    }
+
+    #ingredients-and-instructions{
+        display: flex;
+        column-gap: 30px;    
+    }
+
+    .ingredients-instructions {
+        background-color: #AE7589;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    #recipe-view-nutrition-facts{
+        background-color: #5C3A4E;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+        width: 200px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    .nutrition-facts-items{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: start;
+        align-items: start;
+        padding-top: 5px;
+    }
+
+    #recipe-view-facts{
+        display: flex;
+        flex-direction: column;
+        padding-top: 10px;
+        row-gap: 10px;
+    }
+
+    #instructions-and-note { 
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+        width: 45vw;
+    }
+
+    #recipe-details{
+        display: flex;
+        column-gap: 20px;
+        padding-bottom: 20px;
+    }
+
+    .instruction-details {
+        padding-top: 15px;
+    }
+
+    .image-instruction {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        padding-top: 10px;
+    }
+</style>
+
+<body>
+    <div id="recipe-view">
+        <div id="recipe-view-image-and-title">
+            <div id="recipe-image">
+                @if (recipe.Image != null && recipe.Image != string.Empty)
+                {
+                    <img src="@recipe.Image" />
+                }
+                else
+                {
+                    <img src="https://luigispizzakenosha.com/wp-content/uploads/placeholder.png" />
+                }
+            </div>
+            <div id="title-description">
+                <div id="title-buttons">
+                    <label style="font-size:30px">@recipe.Title</label>
+                    <div id="recipe-view-buttons">
+                        <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="() => EditRecipe(recipe.Id)"><i class="oi oi-pencil"></i></Button>
+                        <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="() => DeleteRecipe(recipe.Id)"><i class="oi oi-trash"></i></Button>
+                    </div>
+                </div>
+                <label id="recipe-view-description" style="font-size:20px">@recipe.Description</label>
+            </div>
+        </div>
+        <div id="recipe-details">
+            <div id="recipe-view-time-and-nutrition">
+                <div id="recipe-view-time-details">
+                    @if (recipe.PrepTime > 0)
+                    {
+                        <div id="prep-time" class="recipe-view-details">
+                            <label><strong>Prep Time</strong></label>
+                            <label>@recipe.PrepTime minutes</label>
+                        </div>
+                    }
+                    <div id="cook-time" class="recipe-view-details">
+                        <label><strong>Cook Time</strong></label>
+                        <label>@recipe.CookTime minutes</label>
+                    </div>
+                    @if (recipe.AdditionalTime > 0)
+                    {
+                        <div id="additional-time" class="recipe-view-details">
+                            <label><strong>Additional Time</strong></label>
+                            <label>@recipe.AdditionalTime minutes</label>
+                        </div>
+                    }
+                    <div id="servings" class="recipe-view-details">
+                        <label><strong>Servings</strong></label>
+                        <label>@recipe.Servings servings</label>
+                    </div>
+                    <div id="yield" class="recipe-view-details">
+                        <label><strong>Yield</strong></label>
+                        <label>@recipe.Yield</label>
+                    </div>
+                </div>
+                <div id="recipe-view-nutrition-facts">
+                    <label><strong>Nutrition Facts</strong></label>
+                    <div id="recipe-view-facts">
+                        <div class="nutrition-facts-items">
+                            <label for="nutrition-facts-calories"><strong>Calories</strong></label>
+                            <label>@nutritionFacts.Calories</label>
+                        </div>
+                        <div class="nutrition-facts-items">
+                            <label for="nutrition-facts-carbs"><strong>Carbs</strong></label>
+                            <label>@nutritionFacts.Carbs g</label>
+                        </div>
+                        <div class="nutrition-facts-items">
+                            <label for="nutrition-facts-fat"><strong>Fat</strong></label>
+                            <label>@nutritionFacts.Fat g</label>
+                        </div>
+                        <div class="nutrition-facts-items">
+                            <label for="nutrition-facts-protein"><strong>Protein</strong></label>
+                            <label>@nutritionFacts.Protein g</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="ingredients-and-instructions">
+                <div id="recipe-view-ingredients" class="ingredients-instructions">
+                    <label><strong>Ingredients</strong></label> <br>
+                    @foreach (var ingredientNote in ingredientsDict)
+                    {
+                        <label style="font:bolder">@ingredientNote.Key.Title</label> <br />
+                        @foreach (var ingredient in ingredientNote.Value)
+                        {
+                            <label style="word-break: keep-all">• @ingredient.Quantity @ingredient.Name</label>
+                            <br />
+                        }
+                    }
+                </div>
+                <div id="instructions-and-note">
+                    <div id="recipe-note">
+                        <label><strong>NOTE:</strong> @recipe.Note</label>
+                    </div>
+                    <div id="recipe-view-instructions" class="ingredients-instructions">
+                        <label><strong>Instructions</strong></label> <br>
+                        @foreach (var instruction in instructions)
+                        {
+                            <div class="instruction-details">
+                                <label style="font-size:20px">○ @instruction.Title</label> <br />
+                                <label style="font-size:15px">@instruction.Description</label>
+                                @if (instruction.Image != null && instruction.Image != string.Empty)
+                                {
+                                    <div class="image-instruction">
+                                        <img style="display: flex;justify-content: center;align-self: center" src="@instruction.Image" />
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    Recipe recipe = new Recipe { Cookbook = new Cookbook() };
+    NutritionFacts nutritionFacts = new NutritionFacts { Recipe = new Recipe() };
+    IDictionary<IngredientNote, List<Ingredient>> ingredientsDict = new Dictionary<IngredientNote, List<Ingredient>>();
+    List<Instruction> instructions = new List<Instruction>();
+    Cookbook cookbookDropDown = new Cookbook();
+    int idRecipe = -1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Id != null)
+        {
+            idRecipe = (int)Id;
+            recipe = await _RecipeService.GetRecipe(idRecipe);
+            instructions = await _InstructionService.GetInstructionsByRecipe(idRecipe);
+            var nutritionFactsList = await _NutritionFactsService.GetNutritionFactsByRecipe((int)Id);
+            if (nutritionFactsList != null && nutritionFactsList.Count > 0)
+            {
+                nutritionFacts = nutritionFactsList[0];
+            }            
+            var ingredientDictList = new Dictionary<IngredientNote, List<Ingredient>>();
+            var ingredientNoteList = await _IngredientNoteService.GetIngredientNotesByRecipe((int)Id);
+            if (ingredientNoteList != null)
+            {
+                foreach (var ingredientNote in ingredientNoteList)
+                {
+                    var ingredientList = await _IngredientService.GetIngredientsByRecipeAndIngredientNote((int)Id, ingredientNote.Id);
+                    if (ingredientList != null)
+                    {
+                        ingredientDictList.Add(ingredientNote, ingredientList);
+                    }                    
+                }
+                ingredientsDict = ingredientDictList;
+            }
+            
+        }       
+    }
+
+    protected void EditRecipe(int id)
+    {
+        _NavigationManager.NavigateTo($"/recipeform/{id}", true);
+    }
+
+    protected async void DeleteRecipe(int id)
+    {
+        await _RecipeService.DeleteRecipe(idRecipe);
+        _NavigationManager.NavigateTo("/", true);
+    }
+}
+

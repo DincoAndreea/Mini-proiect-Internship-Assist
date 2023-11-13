@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "IKcJeU74XOS8A9Z9psSY9jHDTtyLpPgrgHb8JNJO0pDL2a08lE9oh13/UlVrOSpqZROBGexKr+pd6XuUqzQZCw==",
+  "success": true,
+  "projectFilePath": "D:\\ProiecteVisualStudio\\RecipeApp\\Shared\\RecipeApp.Shared.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\dinco\\.nuget\\packages\\blazor.bootstrap\\1.10.3\\blazor.bootstrap.1.10.3.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.aspnetcore.authorization\\6.0.11\\microsoft.aspnetcore.authorization.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.aspnetcore.components\\6.0.11\\microsoft.aspnetcore.components.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\6.0.11\\microsoft.aspnetcore.components.analyzers.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.aspnetcore.components.forms\\6.0.11\\microsoft.aspnetcore.components.forms.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.aspnetcore.components.web\\6.0.11\\microsoft.aspnetcore.components.web.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.aspnetcore.metadata\\6.0.11\\microsoft.aspnetcore.metadata.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\6.0.1\\microsoft.extensions.dependencyinjection.6.0.1.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\6.0.0\\microsoft.extensions.dependencyinjection.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.3\\microsoft.extensions.logging.abstractions.6.0.3.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.extensions.options\\6.0.0\\microsoft.extensions.options.6.0.0.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.extensions.primitives\\6.0.0\\microsoft.extensions.primitives.6.0.0.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\microsoft.jsinterop\\6.0.11\\microsoft.jsinterop.6.0.11.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\system.io.pipelines\\6.0.3\\system.io.pipelines.6.0.3.nupkg.sha512",
+    "C:\\Users\\dinco\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

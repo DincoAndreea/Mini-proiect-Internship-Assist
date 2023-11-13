@@ -1,0 +1,725 @@
+﻿@page "/recipeform"
+@page "/recipeform/{Id:int}"
+@using RecipeApp.Shared
+@inject ICookbookService _CookbookService
+@inject IRecipeService _RecipeService
+@inject IIngredientService _IngredientService
+@inject IIngredientNoteService _IngredientNoteService
+@inject IInstructionService _InstructionService
+@inject INutritionFactsService _NutritionFactsService
+@inject NavigationManager _NavigationManager
+
+<style>
+    body {
+        padding: 20px;
+        background-color: #F5DFD6;
+        color: #7F594F;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-width: 800px;
+    }
+
+    h3 {
+        align-self: start;
+    }
+
+    img {
+        border-radius: 5px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        border: none;
+        outline: none;
+    }
+
+    input::file-selector-button {
+        font-weight: bold;
+        background-color: #5C3A4E;
+        color: #F0EAE2;
+        padding: 0.5em;
+        border: 0;
+        border-radius: 5px;
+    }
+
+    #recipe-edit-image-and-title {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        column-gap: 15px;
+    }
+
+    #recipe-edit-image {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+    }
+
+    #recipe-edit-title {
+        min-width: 200px;
+        width: 100%;
+    }
+
+    input[type=number], input[type=text], .input-text {
+        border-radius: 5px;
+        border: none;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    input[type=number] {
+        width: 70px;
+    }
+
+    textarea {
+        border-radius: 5px;
+        border: none;
+        height: 130px;
+        resize: vertical;
+        min-height: 25px;
+        max-height: 130px;
+        width: 100%;
+        min-width: 200px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    #recipe-edit-title-description {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        max-height: 340px;
+        padding: 15px;
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    label {
+        padding-bottom: 3px;
+    }
+
+    #recipe-edit-details {
+        display: flex;
+        padding-top: 25px;
+        flex-direction: row;
+        column-gap: 20px;
+        width: 100%;
+    }
+
+    #recipe-edit-yield {
+        width: 120px;
+    }
+
+    #recipe-edit-time-details {
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;      
+        height: 100%;
+    }
+
+    #recipe-edit-time {
+        background-color: #AE7589;
+        color: #F0EAE2;
+        border-radius: 5px;
+        flex-direction: column;
+        row-gap: 15px;
+        height: 100%;
+        width: 150px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        padding: 15px;
+    }
+
+    #recipe-edit-nutrition-facts {
+        background-color: #5C3A4E;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+        width: 150px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    #recipe-edit-facts {
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+    }
+
+    .nutrition-details {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #recipe-edit-buttons {
+        display: flex;
+        white-space: nowrap;
+        gap: 10px;
+    }
+
+    #recipe-edit-ingredients, #recipe-edit-instructions {
+        background-color: #AE7589;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        height: 100%;
+        
+    }
+
+    #recipe-edit-ingredients {
+        width: 25vw;
+        min-width: fit-content;
+        min-height: 624px;
+    }
+
+    #recipe-edit-instructions {
+        min-height: 395px;
+    }
+
+    #recipe-edit-instructions-and-note {
+        width: 40vw;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+        min-width: 300px;
+    }
+
+    .ingredient-details {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;        
+    }
+
+    .ingredient-details > input[type=text] {
+        width: 150px;
+        height: 37px;
+    }
+
+    .ingredient-and-remove-button {
+        display: flex;
+        flex-direction: row;
+        column-gap: 5px;
+    }
+
+    .ingredient-and-remove-button > input[type=text] {
+        width: 150px;
+        height: 37px;
+    }
+
+    .ingredient-note {
+        display: flex;
+        padding-bottom: 10px;
+        column-gap: 5px;
+    }
+
+    .ingredient-note > input[type=text] {
+        width: 200px;
+        height: 37px;
+    }
+
+    #recipe-edit-note {
+        background-color: #5C3A4E;
+        color: #F0EAE2;
+        padding: 15px;
+        border-radius: 5px;
+    }
+
+    .instruction-details {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+        padding-top: 25px;
+    }
+
+    .instruction-details > img {
+        align-self: center;
+    }
+
+    #instruction-title-and-remove-button {
+        display: flex;
+        column-gap: 5px;
+    }
+
+    .instruction-image {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+    }
+
+    .instruction-image img {
+        width: 250px;
+        height: 250px;
+    }
+
+    .instruction-image input::file-selector-button {
+        margin-left: 34px;
+    }
+</style>
+
+<body>
+    
+
+    <EditForm Model="recipe" OnValidSubmit="SetRecipe">
+        @if (Id == null)
+        {
+            <h3>Add Recipe</h3>
+        }
+        else
+        {
+            <h3>Edit Recipe</h3>
+        }
+        <div id="recipe-edit-image-and-title">
+            <div id="recipe-edit-image">
+                <img src="@recipe.Image" style="width: 300px; height: 300px;" /> <br /> <br />
+                <InputFile OnChange="@InputFileChangedRecipe"></InputFile>
+            </div>
+            <div id="recipe-edit-title-description">
+                <div>
+                    <label for="recipe-edit-title"><strong>Title</strong></label> <br />
+                    <input required id="recipe-edit-title" class="input-text" @bind="recipe.Title">@recipe.Title</input>
+                </div>               
+                <div>
+                    <label for="recipe-edit-description"><strong>Description</strong></label> <br>
+                    <textarea required maxlength="250" id="recipe-edit-description" @bind="recipe.Description">@recipe.Description</textarea>
+                </div> 
+                <div>
+                    <Dropdown>
+                        <DropdownToggleButton Style="background-color: #5C3A4E; color: #F0EAE2">@cookbookDropDown.Name</DropdownToggleButton>
+                        <DropdownMenu Style="background-color: #5C3A4E; color: #F0EAE2">
+                            @foreach (var cookbook in _CookbookService.Cookbooks)
+                            {
+                                <DropdownItem Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="() => GetDropdownValue(cookbook)">@cookbook.Name</DropdownItem>
+                            }
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>               
+                <div id="recipe-edit-buttons">
+                    <Button Style="background-color: #5C3A4E;color: #F0EAE2" Type="ButtonType.Submit"><i class="oi oi-file"></i></Button>
+                    @if (Id != null)
+                    {
+                        <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="Delete"><i class="oi oi-trash"></i></Button>
+                    }
+                    <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="Cancel"><i class="oi oi-circle-x"></i></Button>
+                </div>
+            </div>
+        </div>
+        <div id="recipe-edit-details">
+            <div id="recipe-edit-time-details">
+                <div id="recipe-edit-time">
+                    <div class="time-details">
+                        <label for="recipe-edit-prep-time"><strong>Prep Time</strong></label> <br>
+                        <input required min="0" type="number" id="recipe-edit-prep-time" @bind="recipe.PrepTime" placeholder="Prep Time"></input>
+                    </div>
+                    <div class="time-details">
+                        <label for="recipe-edit-cook-time"><strong>Cook Time</strong></label> <br>
+                        <input required min="0" type="number" id="recipe-edit-cook-time" @bind="recipe.CookTime" placeholder="Cook Time"></input>
+                    </div>
+                    <div class="time-details">
+                        <label for="recipe-edit-additional-time"><strong>Additional Time</strong></label> <br>
+                        <input required min="0" type="number" id="recipe-edit-additional-time" @bind="recipe.AdditionalTime" placeholder="Additional Time"></input>
+                    </div>
+                    <div class="time-details">
+                        <label for="recipe-edit-servings"><strong>Servings</strong></label> <br>
+                        <input required min="1" type="number" id="recipe-edit-servings" @bind="recipe.Servings" placeholder="Servings"></input>
+                    </div>
+                    <div class="time-details">
+                        <label for="recipe-edit-yield"><strong>Yield</strong></label> <br>
+                        <input class="input-text" required id="recipe-edit-yield" @bind="recipe.Yield" placeholder="Yield"></input>
+                    </div>
+                </div>
+                <div id="recipe-edit-nutrition-facts">
+                    <label><strong>Nutrition Facts</strong></label> <br /> <br />
+                    <div id="recipe-edit-facts">
+                        <div class="nutrition-details">
+                            <label for="nutrition-facts-calories"><strong>Calories</strong></label> <br /> <br />
+                            <input required min="0" type="number" id="nutrition-facts-calories" placeholder="Calories" @bind="nutritionFacts.Calories"></input>
+                        </div>
+                        <div class="nutrition-details">
+                            <label for="nutrition-facts-carbs"><strong>Carbs</strong></label> <br /> <br />
+                            <input required min="0" type="number" id="nutrition-facts-carbs" placeholder="Carbs" @bind="nutritionFacts.Carbs"></input>
+                        </div>
+                        <div class="nutrition-details">
+                            <label for="nutrition-facts-fat"><strong>Fat</strong></label> <br /> <br />
+                            <input required min="0" type="number" id="nutrition-facts-fat" placeholder="Fat" @bind="nutritionFacts.Fat"></input>
+                        </div>
+                        <div class="nutrition-details">
+                            <label for="nutrition-facts-protein"><strong>Protein</strong></label> <br /> <br />
+                            <input required min="0" type="number" id="nutrition-facts-protein" placeholder="Protein" @bind="nutritionFacts.Protein"></input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="recipe-edit-ingredients">
+                <label><strong>Ingredients</strong></label> <br>
+                @foreach (var ingredientNote in ingredientsDict)
+                {
+                    <div class="ingredient-note">
+                        <input type="text" placeholder="ex: For the crust:" id="@ingredientNote.Key.Title" @bind="ingredientNote.Key.Title"></input> <br />
+                        <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="() => RemoveIngredientNote(ingredientNote.Key)"><i class="oi oi-trash"></i></Button> <br />
+                    </div>                    
+                    @foreach (var ingredient in ingredientNote.Value)
+                    {
+                        <div class="ingredient-details">
+                            <div class="ingredient-and-remove-button">
+                                <input type="text" placeholder="ex: eggs" id="@ingredient.Name" @bind="ingredient.Name"></input> <br />
+                                <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="() => RemoveIngredient(ingredientNote.Key, ingredient)"><i class="oi oi-trash"></i></Button> <br />
+                            </div>                           
+                            <input type="text" placeholder="ex: 1 tablespoon" id="@ingredient.Quantity" @bind="ingredient.Quantity"></input> <br />                            
+                        </div>  
+                    }
+                    <Button Style="background-color: #5C3A4E;color: #F0EAE2; margin-bottom: 5px;" @onclick="() => AddIngredient(ingredientNote.Key)">Add Ingredient</Button> <br />
+                }
+                <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="AddIngredientNote">Add Ingredient Note</Button> <br>
+            </div>
+            <div id="recipe-edit-instructions-and-note">
+                <div id="recipe-edit-note">
+                    <label><strong>Note</strong></label> <br>
+                <textarea @bind="recipe.Note" placeholder="Add notes for your recipe..."></textarea> <br> <br />
+                </div>   
+                <div id="recipe-edit-instructions">
+                    <label><strong>Instructions</strong></label> <br>
+                    @foreach (var instruction in instructions)
+                    {
+                        <div class="instruction-details">
+                            <div id="instruction-title-and-remove-button">
+                                <input type="text" placeholder="ex: Make the pie dough:" id="@instruction.Title" @bind="instruction.Title"></input> <br />
+                                <Button Style="background-color: #5C3A4E;color: #F0EAE2" @onclick="() => RemoveInstruction(instruction)"><i class="oi oi-trash"></i></Button> <br />
+                            </div>                          
+                            <textarea placeholder="ex: In a food processor, combine the flour..." id="@instruction.Description" @bind="instruction.Description"></textarea> <br />
+                            <div class="instruction-image">
+                                <img src="@instruction.Image"/> <br /> <br />
+                                <InputFile OnChange="args => InputFileChangedInstruction(args, instruction)"></InputFile>
+                            </div>                            
+                        </div>
+                    }
+                    <Button Style="background-color: #5C3A4E;color: #F0EAE2; margin-top: 5px" @onclick="@AddInstruction">Add instructions</Button>
+                </div>               
+            </div>
+            
+        </div>        
+    </EditForm>
+</body>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    Recipe recipe = new Recipe { Cookbook = new Cookbook() };
+    NutritionFacts nutritionFacts = new NutritionFacts { Recipe = new Recipe() };
+    IDictionary<IngredientNote, List<Ingredient>> ingredientsDict = new Dictionary<IngredientNote, List<Ingredient>>();
+    List<Instruction> instructions = new List<Instruction>();
+    Cookbook cookbookDropDown = new Cookbook();
+    int idRecipe = -1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await _CookbookService.GetCookbooks();
+        cookbookDropDown = _CookbookService.Cookbooks[0];
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            recipe.Cookbook = _CookbookService.Cookbooks[0];
+            recipe.CookbookId = recipe.Cookbook.Id;           
+        }
+        else
+        {
+            idRecipe = (int)Id;
+            recipe = await _RecipeService.GetRecipe(idRecipe);
+            instructions = await _InstructionService.GetInstructionsByRecipe(idRecipe);
+            var nutritionFactsList = await _NutritionFactsService.GetNutritionFactsByRecipe((int)Id);
+            if (nutritionFactsList != null && nutritionFactsList.Count > 0)
+            {
+                nutritionFacts = nutritionFactsList[0];
+            }
+            var ingredientDictList = new Dictionary<IngredientNote, List<Ingredient>>();
+            var ingredientNoteList = await _IngredientNoteService.GetIngredientNotesByRecipe((int)Id);
+            if (ingredientNoteList != null)
+            {
+                foreach (var ingredientNote in ingredientNoteList)
+                {
+                    var ingredientList = await _IngredientService.GetIngredientsByRecipeAndIngredientNote((int)Id, ingredientNote.Id);
+                    if (ingredientList != null)
+                    {
+                        ingredientDictList.Add(ingredientNote, ingredientList);
+                    }                   
+                }
+                ingredientsDict = ingredientDictList;
+            }
+
+        }
+    }
+
+    private async void InputFileChangedRecipe(InputFileChangeEventArgs inputFileChangeEventArgs)
+    {
+        var file = inputFileChangeEventArgs.File;
+
+        var array = new byte[file.Size];
+
+        await file.OpenReadStream(5000000).ReadAsync(array);
+
+        recipe.Image = $"data:image/png;base64,{Convert.ToBase64String(array)}";
+    }
+
+    private async void InputFileChangedInstruction(InputFileChangeEventArgs inputFileChangeEventArgs, Instruction instruction)
+    {
+        var file = inputFileChangeEventArgs.File;
+
+        var array = new byte[file.Size];
+
+        await file.OpenReadStream(5000000).ReadAsync(array);
+
+        instruction.Image = $"data:image/png;base64,{Convert.ToBase64String(array)}";
+    }
+
+    private void GetDropdownValue(Cookbook cookbook)
+    {
+        cookbookDropDown = cookbook;
+    }
+
+    private void AddIngredientNote()
+    {
+        ingredientsDict.Add(new IngredientNote(), new List<Ingredient>());
+    }
+
+    private async void RemoveIngredientNote(IngredientNote ingredientNote)
+    {
+        ingredientsDict.Remove(ingredientNote);
+        if (ingredientNote.Id != 0)
+        {
+            await _IngredientNoteService.DeleteIngredientNote(ingredientNote.Id);
+        }
+    }
+
+    private void AddIngredient(IngredientNote ingredientNote)
+    {
+        ingredientsDict[ingredientNote].Add(new Ingredient());
+    }
+
+    private async void RemoveIngredient(IngredientNote ingredientNote, Ingredient ingredient)
+    {
+        ingredientsDict[ingredientNote].Remove(ingredient);
+        if (ingredient.Id != 0)
+        {
+            await _IngredientService.DeleteIngredient(ingredient.Id);
+        }
+    }
+
+    private void AddInstruction()
+    {
+        instructions.Add(new Instruction());
+    }
+
+    private async void RemoveInstruction(Instruction instruction)
+    {
+        instructions.Remove(instruction);
+        if (instruction.Id != 0)
+        {
+            await _InstructionService.DeleteInstruction(instruction.Id);
+        }        
+    }
+
+    private async void Delete()
+    {
+        await _RecipeService.DeleteRecipe(idRecipe);
+        _NavigationManager.NavigateTo("/", true);
+    }
+
+    private void Cancel()
+    {
+        _NavigationManager.NavigateTo("/", true);
+    }
+
+    private async Task SetRecipe()
+    {
+        if (Id == null)
+        {
+            Recipe createRecipe = new Recipe();
+            createRecipe.Title = recipe.Title;
+            createRecipe.Description = recipe.Description;
+            createRecipe.CookTime = recipe.CookTime;
+            createRecipe.PrepTime = recipe.PrepTime;
+            createRecipe.AdditionalTime = recipe.AdditionalTime;
+            createRecipe.Servings = recipe.Servings;
+            createRecipe.Yield = recipe.Yield;
+            createRecipe.Note = recipe.Note;
+            createRecipe.Cookbook = null;
+            createRecipe.Image = recipe.Image;
+            createRecipe.CookbookId = cookbookDropDown.Id == 0 ? 1 : cookbookDropDown.Id;
+            int totalTime = (recipe.PrepTime == null ? 0 : (int)recipe.PrepTime) + (recipe.CookTime == null ? 0 : (int)recipe.CookTime) + (recipe.AdditionalTime == null ? 0 : (int)recipe.AdditionalTime);
+            createRecipe.TotalTime = totalTime;
+            var recipeCreated = await _RecipeService.CreateRecipe(createRecipe);         
+
+            foreach (var ingredientNote in ingredientsDict)
+            {
+                IngredientNote createIngredientNote = new IngredientNote();
+                createIngredientNote.Title = ingredientNote.Key.Title;
+                createIngredientNote.Recipe = null;
+                createIngredientNote.RecipeId = recipeCreated.Id;
+                var ingredientNoteCreated = await _IngredientNoteService.CreateIngredientNote(createIngredientNote);
+                foreach (var ingredient in ingredientNote.Value)
+                {
+                    Ingredient createIngredient = new Ingredient();
+                    createIngredient.Name = ingredient.Name;
+                    createIngredient.Quantity = ingredient.Quantity;
+                    createIngredient.IngredientNote = null;
+                    createIngredient.IngredientNoteId = ingredientNoteCreated.Id;
+                    createIngredient.Recipe = null;
+                    createIngredient.RecipeId = recipeCreated.Id;
+                    var ingredientCreated = await _IngredientService.CreateIngredient(createIngredient);
+                }
+            }
+
+            foreach (var instruction in instructions)
+            {
+                Instruction createInstruction = new Instruction();
+                createInstruction.Title = instruction.Title;
+                createInstruction.Image = instruction.Image;
+                createInstruction.Description = instruction.Description;
+                createInstruction.Recipe = null;
+                createInstruction.RecipeId = recipeCreated.Id;
+                var instructionCreated = await _InstructionService.CreateInstruction(createInstruction);
+            }
+
+            NutritionFacts createNutritionFacts = new NutritionFacts();
+            createNutritionFacts.Calories = nutritionFacts.Calories;
+            createNutritionFacts.Carbs = nutritionFacts.Carbs;
+            createNutritionFacts.Fat = nutritionFacts.Fat;
+            createNutritionFacts.Protein = nutritionFacts.Protein;
+            createNutritionFacts.Recipe = null;
+            createNutritionFacts.RecipeId = recipeCreated.Id;
+            var nutritionFactsCreated = await _NutritionFactsService.CreateNutritionFacts(createNutritionFacts);
+            _NavigationManager.NavigateTo("/", true);
+        }
+        else
+        {
+            Recipe updateRecipe = new Recipe();
+            updateRecipe.Title = recipe.Title;
+            updateRecipe.Description = recipe.Description;
+            updateRecipe.CookTime = recipe.CookTime;
+            updateRecipe.PrepTime = recipe.PrepTime;
+            updateRecipe.AdditionalTime = recipe.AdditionalTime;
+            updateRecipe.Servings = recipe.Servings;
+            updateRecipe.Yield = recipe.Yield;
+            updateRecipe.Note = recipe.Note;
+            updateRecipe.Cookbook = null;
+            updateRecipe.Image = recipe.Image;
+            updateRecipe.CookbookId = cookbookDropDown.Id == 0 ? 1 : cookbookDropDown.Id;
+            int totalTime = (recipe.PrepTime == null ? 0 : (int)recipe.PrepTime) + (recipe.CookTime == null ? 0 : (int)recipe.CookTime) + (recipe.AdditionalTime == null ? 0 : (int)recipe.AdditionalTime);
+            updateRecipe.TotalTime = totalTime;
+            updateRecipe.Id = idRecipe;
+            var recipeUpdated = await _RecipeService.UpdateRecipe(updateRecipe);
+
+            foreach (var ingredientNote in ingredientsDict)
+            {
+                IngredientNote updateIngredientNote = new IngredientNote();
+                IngredientNote createIngredientNote = new IngredientNote();
+                var getIngredientNote = await _IngredientNoteService.GetIngredientNote(ingredientNote.Key.Id);
+                if(getIngredientNote.Title != null)
+                {
+                    updateIngredientNote.Id = ingredientNote.Key.Id;
+                    updateIngredientNote.Title = ingredientNote.Key.Title;
+                    updateIngredientNote.Recipe = null;
+                    updateIngredientNote.RecipeId = idRecipe;
+                    var ingredientNoteUpdated = await _IngredientNoteService.UpdateIngredientNote(updateIngredientNote);
+                }
+                else
+                {                  
+                    createIngredientNote.Title = ingredientNote.Key.Title;
+                    createIngredientNote.Recipe = null;
+                    createIngredientNote.RecipeId = idRecipe;
+                    var ingredientNoteCreated = await _IngredientNoteService.CreateIngredientNote(createIngredientNote);
+                }
+                foreach (var ingredient in ingredientNote.Value)
+                {
+                    var getIngredient = await _IngredientService.GetIngredient(ingredient.Id);
+                    if(getIngredient.Name != null)
+                    {
+                        Ingredient updateIngredient = new Ingredient();
+                        updateIngredient.Id = ingredient.Id;
+                        updateIngredient.Name = ingredient.Name;
+                        updateIngredient.Quantity = ingredient.Quantity;
+                        updateIngredient.IngredientNote = null;
+                        updateIngredient.IngredientNoteId = updateIngredientNote != null? updateIngredientNote.Id : createIngredientNote.Id;
+                        updateIngredient.Recipe = null;
+                        updateIngredient.RecipeId = idRecipe;
+                        var ingredientUpdated = await _IngredientService.UpdateIngredient(updateIngredient);
+                    }
+                    else
+                    {
+                        Ingredient createIngredient = new Ingredient();
+                        createIngredient.Name = ingredient.Name;
+                        createIngredient.Quantity = ingredient.Quantity;
+                        createIngredient.IngredientNote = null;
+                        createIngredient.IngredientNoteId = updateIngredientNote != null ? updateIngredientNote.Id : createIngredientNote.Id;
+                        createIngredient.Recipe = null;
+                        createIngredient.RecipeId = idRecipe;
+                        var ingredientCreated = await _IngredientService.CreateIngredient(createIngredient);
+                    }
+                }
+            }
+
+            foreach (var instruction in instructions)
+            {
+                var getInstruction = await _InstructionService.GetInstruction(instruction.Id);
+                if(getInstruction.Description != null)
+                {
+                    Instruction updateInstruction = new Instruction();
+                    updateInstruction.Id = instruction.Id;
+                    updateInstruction.Title = instruction.Title;
+                    updateInstruction.Image = instruction.Image;
+                    updateInstruction.Description = instruction.Description;
+                    updateInstruction.Recipe = null;
+                    updateInstruction.RecipeId = idRecipe;
+                    var instructionUpdated = await _InstructionService.UpdateInstruction(updateInstruction);
+                }
+                else
+                {
+                    Instruction createInstruction = new Instruction();
+                    createInstruction.Title = instruction.Title;
+                    createInstruction.Image = instruction.Image;
+                    createInstruction.Description = instruction.Description;
+                    createInstruction.Recipe = null;
+                    createInstruction.RecipeId = idRecipe;
+                    var instructionCreated = await _InstructionService.CreateInstruction(createInstruction);
+                }
+            }
+
+            var getNutritionFacts = await _NutritionFactsService.GetNutritionFacts(nutritionFacts.Id);
+
+            if(getNutritionFacts.Id != 0)
+            {
+                NutritionFacts updateNutritionFacts = new NutritionFacts();
+                updateNutritionFacts.Id = nutritionFacts.Id;
+                updateNutritionFacts.Calories = nutritionFacts.Calories;
+                updateNutritionFacts.Carbs = nutritionFacts.Carbs;
+                updateNutritionFacts.Fat = nutritionFacts.Fat;
+                updateNutritionFacts.Protein = nutritionFacts.Protein;
+                updateNutritionFacts.Recipe = null;
+                updateNutritionFacts.RecipeId = idRecipe;
+                var nutritionFactsUpdated = await _NutritionFactsService.UpdateNutritionFacts(updateNutritionFacts);
+            }
+            else
+            {
+                NutritionFacts createNutritionFacts = new NutritionFacts();
+                createNutritionFacts.Calories = nutritionFacts.Calories;
+                createNutritionFacts.Carbs = nutritionFacts.Carbs;
+                createNutritionFacts.Fat = nutritionFacts.Fat;
+                createNutritionFacts.Protein = nutritionFacts.Protein;
+                createNutritionFacts.Recipe = null;
+                createNutritionFacts.RecipeId = idRecipe;
+                var nutritionFactsCreated = await _NutritionFactsService.CreateNutritionFacts(createNutritionFacts);
+            }
+
+            _NavigationManager.NavigateTo("/", true);
+        }
+    }
+}

@@ -1,0 +1,286 @@
+﻿@page "/"
+@using RecipeApp.Shared;
+@inject ICookbookService _CookbookService
+@inject IRecipeService _RecipeService
+@inject NavigationManager _NavigationManager
+
+<style>
+    body {
+        background-color: #F5DFD6;
+        padding: 20px;
+        height: 100%;
+    }
+
+    #recipes-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-content: space-between;
+        width: calc(100vw - 120px);
+        min-width: 600px;
+    }
+
+    #edit-buttons{
+        display: flex;
+        column-gap: 5px;
+    }
+
+    #create-buttons {
+        display: flex;
+        column-gap: 5px;
+    }
+
+    #recipes-show{
+        display: flex;
+        align-content: flex-start;
+        flex-wrap: wrap;
+        column-gap: 50px;
+    }
+
+    #no-recipes {
+        color: #5C3A4E;
+        font-size: 40px;
+    }
+</style>
+
+<body>
+    <PageTitle>Recipes</PageTitle>
+
+    <h3>Recipes</h3>
+
+    <div id="recipes-buttons">
+        <div id="edit-buttons">
+            <Dropdown @onclick="RefreshCookbooks">
+                <DropdownToggleButton Style="background-color: #5C3A4E; color: #F0EAE2">@getCookbook.Name</DropdownToggleButton>
+                <DropdownMenu Style="background-color: #5C3A4E; color: #F0EAE2">
+                    @foreach (var cookbook in allCookbooks)
+                    {
+                        <DropdownItem Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="() => ShowRecipes(cookbook)">@cookbook.Name</DropdownItem>
+                    }
+                </DropdownMenu>
+            </Dropdown>
+
+            @if (getCookbook.Id == 1 || getCookbook.Id == 0)
+            {
+                <Button id="edit-cookbook-button" Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnShowModalClickEditCookbook" Disabled><i class="oi oi-pencil"></i></Button>
+                <Button id="delete-cookbook-button" Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnShowModalClickDeleteCookbook" Disabled><i class="oi oi-trash"></i></Button>
+            }
+            else
+            {
+                <Button id="edit-cookbook-button" Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnShowModalClickEditCookbook"><i class="oi oi-pencil"></i></Button>
+                <Button id="delete-cookbook-button" Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnShowModalClickDeleteCookbook"><i class="oi oi-trash"></i></Button>
+            }
+        </div>
+        
+        <div id="create-buttons">
+            <Button id="new-recipe-button" Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="@AddRecipe">New Recipe</Button>
+            <Button id="new-cookbook-button" Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnShowModalClickAddCookbook">New Cookbook</Button>
+        </div>      
+    </div>
+
+    <br />
+
+    <Modal @ref="modalDelete" Title="Delete cookbook">
+        <BodyTemplate>
+            Are you sure you want to delete this cookbook?
+        </BodyTemplate>
+        <FooterTemplate>
+            <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnHideModalClickDeleteCookbook">Close</Button>
+            <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="DeleteCurrentCookbook">Delete</Button>
+        </FooterTemplate>
+    </Modal>
+
+    <EditForm Model="getCookbook" OnSubmit="EditCookbook">
+        <Modal @ref="modalEdit" Title="Edit cookbook">
+            <BodyTemplate>
+                <InputText id="cookbook-name" @bind-Value="@getCookbook.Name">@getCookbook.Name</InputText>
+            </BodyTemplate>
+            <FooterTemplate>
+                <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnHideModalClickEditCookbook">Close</Button>
+                <Button Style="background-color: #5C3A4E; color: #F0EAE2" Type="ButtonType.Submit">Save</Button>
+            </FooterTemplate>
+        </Modal>
+    </EditForm>
+
+    <EditForm Model="cookbook" OnSubmit="SaveCookbook">
+        <Modal @ref="modalAdd" Title="Add a cookbook">
+            <BodyTemplate>
+                <InputText id="cookbook-name" @bind-Value="@cookbook.Name"></InputText>
+            </BodyTemplate>
+            <FooterTemplate>
+                <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="OnHideModalClickAddCookbook">Close</Button>
+                <Button Style="background-color: #5C3A4E; color: #F0EAE2" Type="ButtonType.Submit">Save</Button>
+            </FooterTemplate>
+        </Modal>
+    </EditForm>
+
+    <div id="recipes-show-div">
+        <div id="recipes-show">
+            @if (showRecipes.Count > 0)
+            {
+                @foreach (var recipe in @showRecipes)
+                {
+                    <Card Class="mb-4" Style="width:18rem;">
+                        @if (recipe.Image == null || recipe.Image == string.Empty)
+                        {
+                            <img style="height: 300px" class="rounded-top" src="https://luigispizzakenosha.com/wp-content/uploads/placeholder.png" alt="" />
+                        }
+                        else
+                        {
+                            <img style="height: 300px" class="rounded-top" src="@recipe.Image" alt="" />
+                        }
+                        <CardBody>
+                            <CardTitle Style="color: #5C3A4E">@recipe.Title</CardTitle>
+                            <CardText Style="color: #5C3A4E">@recipe.TotalTime minutes</CardText>
+                            <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="() => ViewRecipe(recipe.Id)">View Recipe</Button>
+                            <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="() => EditRecipe(recipe.Id)"><i class="oi oi-pencil"></i></Button>
+                            <Button Style="background-color: #5C3A4E; color: #F0EAE2" @onclick="() => DeleteRecipe(recipe.Id)"><i class="oi oi-trash"></i></Button>
+                        </CardBody>
+                    </Card>
+                }
+            }
+            else
+            {
+                <div id="no-recipes">
+                    No recipes yet...
+                </div>
+            }
+        </div>
+    </div>    
+</body>
+
+
+@code {
+    List<Recipe> showRecipes = new List<Recipe>();
+    List<Cookbook> allCookbooks = new List<Cookbook>();
+
+    Cookbook cookbook = new Cookbook();
+    Cookbook getCookbook = new Cookbook();
+
+    private Modal modalAdd;
+    private Modal modalEdit;
+    private Modal modalDelete;
+
+    private async Task OnShowModalClickAddCookbook()
+    {
+        await modalAdd?.ShowAsync();
+    }
+
+    private async Task OnHideModalClickAddCookbook()
+    {
+        await modalAdd?.HideAsync();
+    }
+
+    private async Task OnShowModalClickEditCookbook()
+    {
+        await modalEdit?.ShowAsync();
+    }
+
+    private async Task OnHideModalClickEditCookbook()
+    {
+        await modalEdit?.HideAsync();
+    }
+
+    private async Task OnShowModalClickDeleteCookbook()
+    {
+        await modalDelete?.ShowAsync();
+    }
+
+    private async Task OnHideModalClickDeleteCookbook()
+    {
+        await modalDelete?.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await _CookbookService.GetCookbooks();
+        await _RecipeService.GetRecipes();
+        showRecipes = _RecipeService.Recipes;
+        getCookbook.Name = "All Cookbooks";
+        allCookbooks.Add(new Cookbook { Id = 0, Name = "All Cookbooks" });
+        allCookbooks.AddRange(_CookbookService.Cookbooks);
+    }
+
+    private async void RefreshCookbooks()
+    {
+        await _CookbookService.GetCookbooks();
+        List<Cookbook> cookbooks = new List<Cookbook>();
+        cookbooks.Add(new Cookbook { Id = 0, Name = "All Cookbooks" });
+        cookbooks.AddRange(_CookbookService.Cookbooks);
+        allCookbooks = cookbooks;
+    }
+
+    private async void Delete(int idRecipe)
+    {
+        await _RecipeService.DeleteRecipe(idRecipe);
+        showRecipes = await _RecipeService.GetRecipesByCookbook(getCookbook.Id);
+    }
+
+    async Task SaveCookbook()
+    {
+        var cookbookPost = await _CookbookService.CreateCookbook(cookbook);
+        Console.WriteLine(cookbookPost.Name + " " + cookbookPost.Id);
+        await OnHideModalClickAddCookbook();
+    }
+
+    async Task EditCookbook()
+    {
+        Cookbook updateCookbook = new Cookbook();
+        updateCookbook.Id = getCookbook.Id;
+        updateCookbook.Name = getCookbook.Name;
+        await _CookbookService.UpdateCookbook(updateCookbook);
+        await OnHideModalClickEditCookbook();
+    }
+
+    private async void EditCurrentCookbook()
+    {
+        await OnHideModalClickEditCookbook();
+    }
+
+    private async void DeleteCurrentCookbook()
+    {
+        await _CookbookService.DeleteCookbook(getCookbook.Id);
+        await OnHideModalClickDeleteCookbook();
+        getCookbook = allCookbooks[0];
+        _NavigationManager.NavigateTo("/recipes", true);
+    }
+
+    protected async void ShowRecipes(Cookbook cookbook)
+    {
+        getCookbook = cookbook;
+        if (cookbook.Id == 0)
+        {
+            await _RecipeService.GetRecipes();
+            showRecipes = _RecipeService.Recipes;
+        }
+        else
+        {
+            showRecipes = await _RecipeService.GetRecipesByCookbook(cookbook.Id);
+        }
+    }
+
+    protected void AddRecipe()
+    {
+        _NavigationManager.NavigateTo("/recipeform", true);
+    }
+
+    protected void EditRecipe(int id)
+    {
+        _NavigationManager.NavigateTo($"/recipeform/{id}", true);
+    }
+
+    protected async void DeleteRecipe(int id)
+    {
+        var newRecipes = await _RecipeService.DeleteRecipe(id);
+        showRecipes = newRecipes;
+        getCookbook = allCookbooks[0];
+        _NavigationManager.NavigateTo("/recipes", true);
+    }
+
+    protected void ViewRecipe(int id)
+    {
+        _NavigationManager.NavigateTo($"/recipe/{id}", true);
+    }
+}
+
+
+
